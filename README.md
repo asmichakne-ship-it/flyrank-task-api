@@ -1,8 +1,8 @@
 # Task API
 
-A simple RESTful CRUD API built with **Node.js** and **Express.js** as part of the FlyRank Backend Internship assignment.
+A RESTful CRUD API built with **Node.js**, **Express.js**, and **SQLite** as part of the FlyRank Backend Internship (Week 3 Assignment).
 
-The API allows you to:
+The API allows users to:
 
 - View all tasks
 - View a single task
@@ -14,19 +14,26 @@ The project also includes interactive API documentation using **Swagger UI**.
 
 ---
 
-# Technologies Used
+## Technologies Used
 
 - Node.js
 - Express.js
+- SQLite
+- better-sqlite3
 - Swagger UI
 - Swagger JSDoc
 
 ---
 
-# Installation
+## Why SQLite?
 
-npm install
-npm start
+SQLite was chosen because it is a lightweight, serverless database that stores all data in a single file (`tasks.db`). It requires no separate installation or configuration, making it ideal for small projects and learning backend development.
+
+Unlike the previous version of this project, tasks are now stored permanently and remain available even after the server is restarted.
+
+---
+
+## Installation
 
 Clone the repository:
 
@@ -48,7 +55,7 @@ npm install
 
 ---
 
-# Run the Project
+## Running the Project
 
 Start the server:
 
@@ -70,34 +77,47 @@ http://localhost:3000/docs
 
 ---
 
-# API Endpoints
+## Database
+
+The application automatically creates a SQLite database named:
+
+```
+tasks.db
+```
+
+if it does not already exist.
+
+On the first run it will:
+
+- create the `tasks` table
+- insert three example tasks
+
+The database file is listed in `.gitignore`, so it is **not stored in the GitHub repository**. Every new clone automatically creates a fresh database.
+
+---
+
+## API Endpoints
 
 | Method | Endpoint | Description |
 |---------|----------|-------------|
 | GET | / | API information |
-| GET | /health | Health check |
 | GET | /tasks | Get all tasks |
 | GET | /tasks/{id} | Get a task by ID |
-| POST | /tasks | Create a new task |
+| POST | /tasks | Create a task |
 | PUT | /tasks/{id} | Update a task |
 | DELETE | /tasks/{id} | Delete a task |
 
 ---
 
-# Example curl Output
-
-Command:
+## Example Request
 
 ```bash
 curl -i http://localhost:3000/tasks
 ```
 
-Example output:
+Example response:
 
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-
+```json
 [
   {
     "id": 1,
@@ -108,26 +128,67 @@ Content-Type: application/json; charset=utf-8
     "id": 2,
     "title": "Study Express",
     "done": false
+  },
+  {
+    "id": 3,
+    "title": "Go to the gym",
+    "done": true
   }
 ]
 ```
 
 ---
 
-# Swagger Documentation Screenshot
-https://github.com/user-attachments/assets/f5b6b9d4-8883-4aee-aa96-3056bac898d7
+## Example SQL Query
 
-Project structure:
+One SQL query used during development:
+
+```sql
+SELECT * FROM tasks;
+```
+
+This query returns every task currently stored in the database.
+
+---
+
+## Database Screenshot
+
+Add a screenshot here showing the `tasks` table opened in **DB Browser for SQLite**.
+
+Example:
+
+```
+![Database Screenshot](images/database.png)
+```
+
+---
+
+## Swagger Documentation
+
+Add your Swagger screenshot here:
+
+```
+![Swagger UI](images/swagger.png)
+```
+
+---
+
+## Project Structure
 
 ```
 flyrank-task-api/
 │
 ├── app.js
+├── database.js
 ├── package.json
 ├── package-lock.json
 ├── README.md
 ├── .gitignore
+└── node_modules/
 ```
 
-# Author
-Created as part of the **FlyRank Backend Internship** assignment.
+---
+
+## Author
+
+Created as part of the FlyRank Backend Internship Backend Track - Week 3 Assignment.
