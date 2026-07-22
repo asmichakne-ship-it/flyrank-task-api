@@ -5,6 +5,8 @@ const swaggerJsdoc = require("swagger-jsdoc");
 
 const app = express();
 
+const db = require("./database");
+
 app.use(express.json());
 
 const options = {
@@ -22,24 +24,6 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-let tasks = [
-    {
-        id: 1,
-        title: "Buy milk",
-        done: false
-    },
-    {
-        id: 2,
-        title: "Study Express",
-        done: false
-    },
-    {
-        id: 3,
-        title: "Go to the gym",
-        done: true
-    }
-];
 
 /**
  * @swagger
@@ -72,7 +56,17 @@ app.get("/", (req, res) => {
 
 // Route 2 : displays all the tasks
 app.get("/tasks", (req, res) => {
+
+    const tasks = db
+        .prepare("SELECT * FROM tasks")
+        .all();
+
+    tasks.forEach(task => {
+        task.done = Boolean(task.done);
+    });
+
     res.json(tasks);
+
 });
 
 /**
@@ -98,7 +92,10 @@ app.get("/tasks", (req, res) => {
 app.get("/tasks/:id", (req, res) => {
 
     const taskId = Number(req.params.id);
-    const task = tasks.find(task => task.id === taskId);
+
+    const task = db
+        .prepare("SELECT * FROM tasks WHERE id = ?")
+        .get(taskId);
 
     if (!task) {
         return res.status(404).json({
@@ -106,7 +103,10 @@ app.get("/tasks/:id", (req, res) => {
         });
     }
 
+    task.done = Boolean(task.done);
+
     res.json(task);
+
 });
 
 /**
@@ -135,29 +135,25 @@ app.post("/tasks", (req, res) => {
 
     const { title } = req.body;
 
-    if (!title) {
-
-        return res.status(400).json({
-            error: "Title is required"
-        });
-
+    if (!title || title.trim() === "") {
+    return res.status(400).json({
+        error: "Title is required"
+    });
     }
 
-    const maxId = tasks.length > 0
-    ? Math.max(...tasks.map(task => task.id))
-    : 0;
+    const result = db.prepare(
+    "INSERT INTO tasks (title, done) VALUES (?, ?)"
+    ).run(title, 0);
 
     const newTask = {
 
-        id: maxId + 1,
+    id: result.lastInsertRowid,
 
-        title: title,
+    title,
 
-        done: false
+    done: false
 
     };
-
-    tasks.push(newTask);
 
     res.status(201).json(newTask);
 
@@ -196,19 +192,34 @@ app.post("/tasks", (req, res) => {
 app.put("/tasks/:id", (req, res) => {
 
     const taskId = Number(req.params.id);
-    const { title, done } = req.body;
-    const task = tasks.find(task => task.id === taskId);
 
-    if (!task) {
+    const { title, done } = req.body;
+
+    const existing = db
+        .prepare("SELECT * FROM tasks WHERE id = ?")
+        .get(taskId);
+
+    if (!existing) {
+
         return res.status(404).json({
             error: `Task ${taskId} not found`
         });
+
     }
 
-    task.title = title;
-    task.done = done;
+    db.prepare(
+        "UPDATE tasks SET title = ?, done = ? WHERE id = ?"
+    ).run(title, done ? 1 : 0, taskId);
 
-    res.json(task);
+    res.json({
+
+        id: taskId,
+
+        title,
+
+        done
+
+    });
 
 });
 
@@ -235,15 +246,17 @@ app.delete("/tasks/:id", (req, res) => {
 
     const taskId = Number(req.params.id);
 
-    const index = tasks.findIndex(task => task.id === taskId);
+    const result = db
+        .prepare("DELETE FROM tasks WHERE id = ?")
+        .run(taskId);
 
-    if (index === -1) {
+    if (result.changes === 0) {
+
         return res.status(404).json({
             error: `Task ${taskId} not found`
         });
-    }
 
-    tasks.splice(index, 1);
+    }
 
     res.status(204).send();
 
