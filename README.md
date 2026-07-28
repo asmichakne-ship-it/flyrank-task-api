@@ -165,13 +165,13 @@ Example response:
 
 The Screenshot shows the task-api in Swagger
 
-![Swagger](Swagger.png)
+<img src="C:\Users\LENOVO\Desktop\Screenshots\Swagger.png" width="850">
 
 The screenshot shows the working database in Docker
 
-![Docker](Docker.png)
+<img src="C:\Users\LENOVO\Desktop\Screenshots\Docker.png" width="850">
 
----
+--
 
 ## Project Structure
 
