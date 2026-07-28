@@ -161,18 +161,6 @@ Example response:
 
 ---
 
-## Example SQL Query
-
-One SQL query used during development:
-
-```sql
-SELECT * FROM tasks;
-```
-
-This query returns every task currently stored in the database.
-
----
-
 ## Database and Sawgger Screenshot
 
 The Screenshot shows the task-api in Swagger
