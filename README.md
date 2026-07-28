@@ -1,6 +1,6 @@
 # Task API
 
-A RESTful CRUD API built with **Node.js**, **Express.js**, and **SQLite** as part of the FlyRank Backend Internship (Week 3 Assignment).
+A RESTful Task API built with Node.js, Express, PostgreSQL, and Docker. It supports full CRUD operations and includes Swagger documentation for testing the API.
 
 The API allows users to:
 
@@ -18,18 +18,12 @@ The project also includes interactive API documentation using **Swagger UI**.
 
 - Node.js
 - Express.js
-- SQLite
-- better-sqlite3
+- PostgreSQL
+- pg
+- Docker
+- Docker Compose
 - Swagger UI
-- Swagger JSDoc
-
----
-
-## Why SQLite?
-
-SQLite was chosen because it is a lightweight, serverless database that stores all data in a single file (`tasks.db`). It requires no separate installation or configuration, making it ideal for small projects and learning backend development.
-
-Unlike the previous version of this project, tasks are now stored permanently and remain available even after the server is restarted.
+- swagger-jsdoc
 
 ---
 
@@ -38,7 +32,7 @@ Unlike the previous version of this project, tasks are now stored permanently an
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/flyrank-task-api.git
+git clone <repository-url>
 ```
 
 Move into the project folder:
@@ -55,12 +49,34 @@ npm install
 
 ---
 
+## Environment Variables
+
+```env
+PGHOST=localhost
+PGPORT=5432
+PGUSER=postgres
+PGPASSWORD=dev
+PGDATABASE=tasks
+```
+The users should copy the .env.example to .env and update it if needed.
+
+---
+
 ## Running the Project
 
 Start the server:
 
+Local :
+
 ```bash
+npm install
 node app.js
+```
+
+Docker :
+
+```bash
+docker compose up --build
 ```
 
 The API will be available at:
@@ -74,6 +90,12 @@ Swagger documentation:
 ```
 http://localhost:3000/docs
 ```
+
+---
+
+## Docker section
+
+The project includes a Dockerfile and compose.yaml. Running docker compose up --build starts both the Express application and the PostgreSQL database.
 
 ---
 
@@ -153,13 +175,11 @@ This query returns every task currently stored in the database.
 
 ## Database Screenshot
 
-Add a screenshot here showing the `tasks` table opened in **DB Browser for SQLite**.
+The Screenshot shows the task-api in Swagger
+![alt text](Swagger.png)
 
-Example:
-
-```
-![Database Screenshot](images/database.png)
-```
+The screenshot shows the working database in Docker
+![alt text](Docker.png)
 
 ---
 
@@ -177,14 +197,13 @@ Add your Swagger screenshot here:
 
 ```
 flyrank-task-api/
-│
-├── app.js
-├── database.js
-├── package.json
-├── package-lock.json
-├── README.md
-├── .gitignore
-└── node_modules/
+│── app.js
+│── database.js
+│── Dockerfile
+│── compose.yaml
+│── package.json
+│── .env.example
+│── README.md
 ```
 
 ---
