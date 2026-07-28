@@ -165,11 +165,11 @@ Example response:
 
 The Screenshot shows the task-api in Swagger
 
-<img src="C:\Users\LENOVO\Desktop\Screenshots\Swagger.png" width="850">
+<img src="C:\Users\LENOVO\Desktop\Screenshots\Swagger.png" alt="Swagger Screenshot" width="850">
 
 The screenshot shows the working database in Docker
 
-<img src="C:\Users\LENOVO\Desktop\Screenshots\Docker.png" width="850">
+<img src="C:\Users\LENOVO\Desktop\Screenshots\Docker.png" alt="Docker Screenshot" width="850">
 
 --
 
