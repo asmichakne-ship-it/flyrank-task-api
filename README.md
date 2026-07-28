@@ -173,23 +173,15 @@ This query returns every task currently stored in the database.
 
 ---
 
-## Database Screenshot
+## Database and Sawgger Screenshot
 
 The Screenshot shows the task-api in Swagger
-![alt text](Swagger.png)
+
+![Swagger](Swagger.png)
 
 The screenshot shows the working database in Docker
-![alt text](Docker.png)
 
----
-
-## Swagger Documentation
-
-Add your Swagger screenshot here:
-
-```
-![Swagger UI](images/swagger.png)
-```
+![Docker](Docker.png)
 
 ---
 
