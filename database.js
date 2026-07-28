@@ -1,27 +1,39 @@
-const Database = require("better-sqlite3");
+require("dotenv").config();
 
-const db = new Database("tasks.db");
+const { Pool } = require("pg");
 
-db.prepare(`
-CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    done INTEGER NOT NULL
-)
-`).run();
+const pool = new Pool({
+    host: process.env.PGHOST,
+    port: process.env.PGPORT,
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    database: process.env.PGDATABASE,
+});
 
-// Check if table is empty
-const count = db.prepare("SELECT COUNT(*) AS count FROM tasks").get();
+async function initializeDatabase() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS tasks (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            done BOOLEAN NOT NULL
+        )
+    `);
 
-if (count.count === 0) {
+    const result = await pool.query("SELECT COUNT(*) FROM tasks");
 
-    const insert = db.prepare(
-        "INSERT INTO tasks (title, done) VALUES (?, ?)"
-    );
-
-    insert.run("Buy milk", 0);
-    insert.run("Study Express", 0);
-    insert.run("Go to the gym", 1);
+    if (Number(result.rows[0].count) === 0) {
+        await pool.query(`
+            INSERT INTO tasks (title, done)
+            VALUES
+            ('Buy milk', false),
+            ('Study Express', false),
+            ('Go to the gym', true)
+        `);
+    }
 }
 
-module.exports = db;
+initializeDatabase()
+    .then(() => console.log("Database initialized"))
+    .catch(err => console.error(err));
+
+module.exports = pool;

@@ -55,17 +55,13 @@ app.get("/", (req, res) => {
  */
 
 // Route 2 : displays all the tasks
-app.get("/tasks", (req, res) => {
+app.get("/tasks", async (req, res) => {
 
-    const tasks = db
-        .prepare("SELECT * FROM tasks")
-        .all();
+    const result = await db.query(
+    "SELECT * FROM tasks ORDER BY id"
+    );
 
-    tasks.forEach(task => {
-        task.done = Boolean(task.done);
-    });
-
-    res.json(tasks);
+    res.json(result.rows);
 
 });
 
@@ -89,23 +85,22 @@ app.get("/tasks", (req, res) => {
  */
 
 // Route 3 : displays a specific task from the list
-app.get("/tasks/:id", (req, res) => {
+app.get("/tasks/:id", async (req, res) => {
 
     const taskId = Number(req.params.id);
 
-    const task = db
-        .prepare("SELECT * FROM tasks WHERE id = ?")
-        .get(taskId);
+    const result = await db.query(
+        "SELECT * FROM tasks WHERE id = $1",
+        [taskId]
+    );
 
-    if (!task) {
+    if (result.rows.length === 0) {
         return res.status(404).json({
             error: `Task ${taskId} not found`
         });
     }
 
-    task.done = Boolean(task.done);
-
-    res.json(task);
+    res.json(result.rows[0]);
 
 });
 
@@ -131,31 +126,22 @@ app.get("/tasks/:id", (req, res) => {
  */
 
 // POST method : for sending data or creating new tasks
-app.post("/tasks", (req, res) => {
+app.post("/tasks", async (req, res) => {
 
     const { title } = req.body;
 
     if (!title || title.trim() === "") {
-    return res.status(400).json({
-        error: "Title is required"
-    });
+        return res.status(400).json({
+            error: "Title is required"
+        });
     }
 
-    const result = db.prepare(
-    "INSERT INTO tasks (title, done) VALUES (?, ?)"
-    ).run(title, 0);
+    const result = await db.query(
+        "INSERT INTO tasks (title, done) VALUES ($1, false) RETURNING *",
+        [title]
+    );
 
-    const newTask = {
-
-    id: result.lastInsertRowid,
-
-    title,
-
-    done: false
-
-    };
-
-    res.status(201).json(newTask);
+    res.status(201).json(result.rows[0]);
 
 });
 
@@ -189,37 +175,26 @@ app.post("/tasks", (req, res) => {
  */
 
 // PUT method : to update the tasks
-app.put("/tasks/:id", (req, res) => {
+app.put("/tasks/:id", async (req, res) => {
 
     const taskId = Number(req.params.id);
-
     const { title, done } = req.body;
 
-    const existing = db
-        .prepare("SELECT * FROM tasks WHERE id = ?")
-        .get(taskId);
+    const result = await db.query(
+        `UPDATE tasks
+         SET title = $1, done = $2
+         WHERE id = $3
+         RETURNING *`,
+        [title, done, taskId]
+    );
 
-    if (!existing) {
-
+    if (result.rows.length === 0) {
         return res.status(404).json({
             error: `Task ${taskId} not found`
         });
-
     }
 
-    db.prepare(
-        "UPDATE tasks SET title = ?, done = ? WHERE id = ?"
-    ).run(title, done ? 1 : 0, taskId);
-
-    res.json({
-
-        id: taskId,
-
-        title,
-
-        done
-
-    });
+    res.json(result.rows[0]);
 
 });
 
@@ -242,20 +217,19 @@ app.put("/tasks/:id", (req, res) => {
  */
 
 // DELETE method : to delete the tasks
-app.delete("/tasks/:id", (req, res) => {
+app.delete("/tasks/:id", async (req, res) => {
 
     const taskId = Number(req.params.id);
 
-    const result = db
-        .prepare("DELETE FROM tasks WHERE id = ?")
-        .run(taskId);
+    const result = await db.query(
+        "DELETE FROM tasks WHERE id = $1 RETURNING *",
+        [taskId]
+    );
 
-    if (result.changes === 0) {
-
+    if (result.rows.length === 0) {
         return res.status(404).json({
             error: `Task ${taskId} not found`
         });
-
     }
 
     res.status(204).send();
